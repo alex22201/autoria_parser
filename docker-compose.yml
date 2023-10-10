@@ -1,0 +1,23 @@
+services:
+  src:
+    build: ./src/
+    command: sh -c "sleep 10s ; python3 ./main.py"
+    depends_on:
+      - database
+    volumes:
+      - ./dumps:/parser_autoria/dumps
+    env_file:
+      - .env
+
+  database:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_ENCODING=${PGCLIENTENCODING}
+    ports:
+      - '3306:3306'
+    env_file:
+      - .env
