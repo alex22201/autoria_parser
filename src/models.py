@@ -9,12 +9,15 @@ Base = declarative_base()
 
 load_dotenv()
 
-DB_NAME = os.getenv("DB_NAME")
-DB_USERNAME = os.getenv("DB_USERNAME")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-ENCODING = os.getenv("PGCLIENTENCODING")
+DB_NAME = os.getenv("POSTGRES_DB")
+DB_USERNAME = os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_ENCODING = os.getenv("POSTGRES_ENCODING")
 
-DATABASE_URL = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@database:5432/{DB_NAME}?client_encoding={ENCODING}"
+
+DATABASE_URL = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DB_NAME}?{POSTGRES_ENCODING}"
 
 
 class Car(Base):

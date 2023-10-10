@@ -9,6 +9,10 @@ from sqlalchemy.orm import sessionmaker
 
 from models import Car, Base
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 
 class AutoRiaParser:
     def __init__(self, start_url, database_url):
@@ -33,7 +37,7 @@ class AutoRiaParser:
             for car_listing in car_listings:
                 url = car_listing.find('a', class_='m-link-ticket')['href']
                 self.active_ads.add(url)
-        print('The data about ads is successfully received')
+        logging.info('The data about ads is successfully received')
 
     def get_cars(self):
         # SQLAlchemy session initialization
@@ -71,8 +75,12 @@ class AutoRiaParser:
                 odometer = float(mileage_element.find('span').text.strip()) * 1000
 
                 # Extract username
-                username_element = soup.find(class_=['seller_info_name bold', 'seller_info_name'])
-                username = str(username_element.text.strip())
+                username_element = soup.select_one('.seller_info_name, .seller_info_name.bold')
+                # Проверяем, был ли найден элемент
+                if username_element:
+                    username = username_element.get_text(strip=True)
+                else:
+                    username = 'Not found'
 
                 # Retrieve the phone number
                 #TODO:
@@ -81,8 +89,11 @@ class AutoRiaParser:
                 phone_number = str(phone_element.text.strip())
 
                 # Extract URL image
-                image_element = soup.find('div', class_='gallery-order carousel')
-                image_url = str(image_element.picture.source['srcset'])
+                image_element = soup.find('div', class_='photo-620x465 loaded')
+                if image_element:
+                    image_url = str(image_element.picture.source['srcset'])
+                else:
+                    image_url = 'Not found'
 
                 # Retrieve the number of images
                 images_count_element = soup.find('span', class_='count')
@@ -122,10 +133,10 @@ class AutoRiaParser:
 
         # Close the SQLAlchemy session.
         session.close()
-        print(f'The data about ads is successfully received and added to db!')
+        logging.info(f'The data about ads is successfully received and added to db!')
 
     def run(self):
-        print('start run')
+        logging.info('start run')
 
         self.parse_all_active_ads()
         self.parse_and_save()
@@ -144,7 +155,7 @@ class AutoRiaParser:
             dump_command = f"pg_dump {self.database_url} > {dump_filename}"
             os.system(dump_command)
 
-            print(f"Created database dump in {dump_filename}")
+            logging.info(f"Created database dump in {dump_filename}")
         except Exception as e:
             raise Exception(f"An error occurred while creating the dump: {str(e)}")
         finally:
