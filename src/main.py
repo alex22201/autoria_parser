@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     parser = AutoRiaParser(START_URL, DATABASE_URL)
 
-    schedule.every().day.at("23:20").do(parser.run)
-    schedule.every().day.at("23:24").do(parser.dump, DUMP_DIRECTORY)
+    schedule.every().day.at("12:00").do(parser.run)
+    schedule.every().day.at("00:00").do(parser.dump, DUMP_DIRECTORY)
 
     # Start scheduler
     while True:

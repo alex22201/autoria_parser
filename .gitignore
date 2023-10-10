@@ -104,5 +104,5 @@ dumps/
 
 .idea/*
 
-.DS_Store/*
+**/.DS_Store
 /todo.sql/
