@@ -106,3 +106,4 @@ dumps/
 
 **/.DS_Store
 /todo.sql/
+/src/test.py

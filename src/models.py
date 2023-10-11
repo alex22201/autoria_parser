@@ -1,23 +1,17 @@
-import os
 from datetime import datetime
-from dotenv import load_dotenv
-from sqlalchemy import Column, Integer, String, DateTime, Float, func
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Float,
+    func
+)
+
 from sqlalchemy.orm import declarative_base
 
 
 Base = declarative_base()
-
-load_dotenv()
-
-DB_NAME = os.getenv("POSTGRES_DB")
-DB_USERNAME = os.getenv("POSTGRES_USER")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_ENCODING = os.getenv("POSTGRES_ENCODING")
-
-
-DATABASE_URL = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DB_NAME}?{POSTGRES_ENCODING}"
 
 
 class Car(Base):
@@ -51,9 +45,9 @@ class Car(Base):
         self.car_number = car_number
         self.car_vin = car_vin
 
-    def __str__(self):
-        return f"{self.username}/{self.link} /{self.title}/{self.price_usd}/" \
-               f"{self.odometer}/{self.phone_number}/{self.car_number}/{self.car_vin}"
+    def __repr__(self):
+        return f"{self.title}/{self.price_usd}/{self.link}\n" \
+               f"{self.username}/{self.odometer}/{self.phone_number}/{self.car_number}/{self.car_vin}"
 
 
 

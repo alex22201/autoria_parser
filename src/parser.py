@@ -7,11 +7,12 @@ from bs4 import BeautifulSoup
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Car, Base
+from models import (
+    Base,
+    Car
+)
 
-import logging
-
-logging.basicConfig(level=logging.INFO)
+from config import logging
 
 
 class AutoRiaParser:
@@ -39,7 +40,7 @@ class AutoRiaParser:
                 self.active_ads.add(url)
         logging.info('The data about ads is successfully received')
 
-    def get_cars(self):
+    def get_all_cars_form_db(self):
         # SQLAlchemy session initialization
         session = self.Session()
 
@@ -50,6 +51,36 @@ class AutoRiaParser:
         session.close()
 
         return cars
+
+    @staticmethod
+    def get_phone_number(soup: BeautifulSoup):
+        """
+            Get a phone number associated with a car listing from Auto.Ria.
+
+            Returns:
+                str: The formatted phone number in the format +38XXXXXXXXXX.
+        """
+
+        auto_id = soup.find('body').get('data-auto-id')
+        script = soup.find('script', class_=lambda x: x and "js-user-secure-" in x)
+        data_expires = script['data-expires']
+        data_hash = script['data-hash']
+
+        url = f"https://auto.ria.com/users/phones/{auto_id}?hash={data_hash}&expires={data_expires}"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+            phone = data.get('formattedPhoneNumber')
+            if not phone:
+                raise ValueError("Phone number not found in the response.")
+            phone = phone.replace("(", "").replace(")", "").replace(" ", "")
+            return '+38' + phone
+
+        except requests.exceptions.RequestException as e:
+            raise requests.exceptions.RequestException(f'Error with HTTP request: {str(e)}')
+        except ValueError as e:
+            raise ValueError(f'Error with JSON response: {str(e)}')
 
     def parse_and_save(self):
         # SQLAlchemy session initialization
@@ -66,6 +97,9 @@ class AutoRiaParser:
                 # Retrieve the title
                 title = str(soup.find('h1', class_='head').text.strip())
 
+                # Retrieve the phone number
+                phone_number = self.get_phone_number(soup)
+
                 # Retrieve the price
                 price_element = soup.find('span', class_='price_value').text.strip()
                 price_usd = float(price_element.replace(' ', '').replace('$', ''))
@@ -74,19 +108,9 @@ class AutoRiaParser:
                 mileage_element = soup.find('div', class_='base-information bold')
                 odometer = float(mileage_element.find('span').text.strip()) * 1000
 
-                # Extract username
-                username_element = soup.select_one('.seller_info_name, .seller_info_name.bold')
-                # Проверяем, был ли найден элемент
-                if username_element:
-                    username = username_element.get_text(strip=True)
-                else:
-                    username = 'Not found'
-
-                # Retrieve the phone number
-                #TODO:
-                # - from 3800XXXXXX format to normal
-                phone_element = soup.find('span', class_='mhide')
-                phone_number = str(phone_element.text.strip())
+                # Retrieve the number of images
+                images_count_element = soup.find('span', class_='count')
+                images_count = int(images_count_element.find('span', class_='mhide').text.split(' ')[1])
 
                 # Extract URL image
                 image_element = soup.find('div', class_='photo-620x465 loaded')
@@ -95,9 +119,12 @@ class AutoRiaParser:
                 else:
                     image_url = 'Not found'
 
-                # Retrieve the number of images
-                images_count_element = soup.find('span', class_='count')
-                images_count = int(images_count_element.find('span', class_='mhide').text.split(' ')[1])
+                # Extract username
+                username_element = soup.select_one('.seller_info_name, .seller_info_name.bold')
+                if username_element:
+                    username = username_element.get_text(strip=True)
+                else:
+                    username = 'Not found'
 
                 # extract the license plate number
                 try:
@@ -136,12 +163,14 @@ class AutoRiaParser:
         logging.info(f'The data about ads is successfully received and added to db!')
 
     def run(self):
-        logging.info('start run')
+        logging.info('Start parse info')
 
         self.parse_all_active_ads()
         self.parse_and_save()
 
     def dump(self, dump_directory):
+        logging.info('Start dump db')
+
         # Create a SQLAlchemy session
         session = self.Session()
 

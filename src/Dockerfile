@@ -10,4 +10,5 @@ WORKDIR /parser_autoria
 COPY main.py /parser_autoria/
 COPY models.py /parser_autoria/
 COPY parser.py /parser_autoria/
+COPY config.py /parser_autoria/
 
