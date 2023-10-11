@@ -7,6 +7,6 @@ COPY /requirements.txt .
 
 RUN pip install -r requirements.txt
 
-WORKDIR /parser_autoria
+WORKDIR ${ROOT_DIR}
 
-COPY *.py /parser_autoria/
+COPY *.py ${ROOT_DIR}/

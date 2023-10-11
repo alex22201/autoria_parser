@@ -10,7 +10,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./dumps:/parser_autoria/dumps
+      - ./dumps:${ROOT_DIR}/dumps
     env_file:
       - .env
 

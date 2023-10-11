@@ -29,12 +29,12 @@ class AutoRiaParser:
 
     def parse_all_active_ads(self):
         response = requests.get(self.start_url)
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = BeautifulSoup(response.content, 'html.parser')
 
         ads_counter = int(soup.find('span', class_='page-item dhide text-c').text.split('/')[1].replace(' ', ''))
         for i in range(1, ads_counter + 1):
             response = requests.get(self.start_url + str(i))
-            car_listings = soup.find_all("section", class_="ticket-item")
+            car_listings = soup.find_all('section', class_='ticket-item')
             for car_listing in car_listings:
                 url = car_listing.find('a', class_='m-link-ticket')['href']
                 self.active_ads.add(url)
@@ -66,14 +66,14 @@ class AutoRiaParser:
         data_expires = script['data-expires']
         data_hash = script['data-hash']
 
-        url = f"https://auto.ria.com/users/phones/{auto_id}?hash={data_hash}&expires={data_expires}"
+        url = f'https://auto.ria.com/users/phones/{auto_id}?hash={data_hash}&expires={data_expires}'
         try:
             response = requests.get(url)
             response.raise_for_status()
             data = response.json()
             phone = data.get('formattedPhoneNumber')
             if not phone:
-                raise ValueError("Phone number not found in the response.")
+                raise ValueError('Phone number not found in the response.')
             phone = phone.replace("(", "").replace(")", "").replace(" ", "")
             return '+38' + phone
 
@@ -93,7 +93,7 @@ class AutoRiaParser:
 
             # Check if the request was successful
             if response.status_code == 200:
-                soup = BeautifulSoup(response.content, "html.parser")
+                soup = BeautifulSoup(response.content, 'html.parser')
                 # Retrieve the title
                 title = str(soup.find('h1', class_='head').text.strip())
 
@@ -154,7 +154,7 @@ class AutoRiaParser:
                 session.add(new_car)
 
             else:
-                raise Exception(f"Error {response.status_code}")
+                raise Exception(f'Error {response.status_code}')
 
         session.commit()
 
@@ -180,13 +180,13 @@ class AutoRiaParser:
         try:
             # Create a database dump
             timestamp = time.strftime("%Y%m%d%H%M%S")
-            dump_filename = os.path.join(dump_directory, f"db_backup_{timestamp}.sql")
-            dump_command = f"pg_dump {self.database_url} > {dump_filename}"
+            dump_filename = os.path.join(dump_directory, f'db_backup_{timestamp}.sql')
+            dump_command = f'pg_dump {self.database_url} > {dump_filename}'
             os.system(dump_command)
 
-            logging.info(f"Created database dump in {dump_filename}")
+            logging.info(f'Created database dump in {dump_filename}')
         except Exception as e:
-            raise Exception(f"An error occurred while creating the dump: {str(e)}")
+            raise Exception(f'An error occurred while creating the dump: {str(e)}')
         finally:
             # Close the SQLAlchemy session.
             session.close()

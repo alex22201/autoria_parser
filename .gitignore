@@ -99,7 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
-dumps/
 
 
 .idea/*
@@ -107,3 +106,5 @@ dumps/
 **/.DS_Store
 /todo.sql/
 /src/test.py
+dumps/
+
