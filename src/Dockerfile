@@ -1,14 +1,12 @@
 # NOTE name need to be Dockerfile
 FROM python:3.10
 
+RUN apt-get update && apt-get install -y postgresql-client-15
+
 COPY /requirements.txt .
 
 RUN pip install -r requirements.txt
 
 WORKDIR /parser_autoria
 
-COPY main.py /parser_autoria/
-COPY models.py /parser_autoria/
-COPY parser.py /parser_autoria/
-COPY config.py /parser_autoria/
-
+COPY *.py /parser_autoria/
