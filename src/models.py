@@ -46,8 +46,8 @@ class Car(Base):
         self.car_vin = car_vin
 
     def __repr__(self):
-        return f"{self.title}/{self.price_usd}/{self.link}\n" \
-               f"{self.username}/{self.odometer}/{self.phone_number}/{self.car_number}/{self.car_vin}"
+        return f"Car({self.title}/{self.price_usd}/{self.link}\n" \
+               f"{self.username}/{self.odometer}/{self.phone_number}/{self.car_number}/{self.car_vin})"
 
 
 
